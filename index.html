@@ -3,60 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Bookmarklet Host</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f6f8fa;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border: 1px solid #d0d7de;
-            border-radius: 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .bookmarklet-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-            background-color: #2da44e;
-            border-radius: 6px;
-            text-decoration: none;
-            cursor: move; /* Shows the user it can be dragged */
-            transition: background 0.2s;
-        }
-        .bookmarklet-btn:hover {
-            background-color: #2c974b;
-        }
-        p {
-            color: #57606a;
-            margin-top: 15px;
-        }
-    </style>
+    <title>ZZSPLO1TS Hub</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <header>
+        <pre>
+ _______  _______  _______  _______  ___      _______  ___   _______  _______ 
+|       ||       ||       ||       ||   |    |       ||   | |       ||       |
+|____   ||____   ||  _____||    _  ||   |    |   _   ||   | |_     _||  _____|
+ ____|  | ____|  || |_____ |   |_| ||   |    |  | |  ||   |   |   |  | |_____ 
+| ______|| ______||_____  ||    ___||   |___ |  |_|  ||   |   |   |  |_____  |
+| |_____ | |_____  _____| ||   |    |       ||       ||   |   |   |   _____| |
+|_______||_______||_______||___|    |_______||_______||___|   |___|  |_______|
+        </pre>
+        <h1>Bookmarklet Directory</h1>
+    </header>
 
-    <div class="container">
-        <h1>Bookmarklet Loader</h1>
-        <p>Drag the button below to your Bookmarks Bar:</p>
-        
-        <a class="bookmarklet-btn" 
-           href="javascript:(function(){ alert('Bookmarklet loaded successfully!'); })();">
-           Drag Me to Bookmarks
-        </a>
+    <main id="container">
+        <div class="card">
+            <h3>Script Injector</h3>
+            <p>Injects custom JS into the current page.</p>
+            <button onclick="copyScript('injector')">Copy Bookmarklet</button>
+        </div>
 
-        <p><small>Hint: Press <strong>Ctrl+Shift+B</strong> (or Cmd+Shift+B) if your bookmarks bar is hidden.</small></p>
-    </div>
+        <div class="card">
+            <h3>UI Overlay</h3>
+            <p>Shows the ZZSPLO1TS custom interface.</p>
+            <button onclick="copyScript('ui')">Copy Bookmarklet</button>
+        </div>
+    </main>
 
+    <script>
+        const scripts = {
+            injector: "javascript:(function(){/* your code here */})();",
+            ui: "javascript:(function(){/* your code here */})();"
+        };
+
+        function copyScript(id) {
+            navigator.clipboard.writeText(scripts[id]);
+            alert("Bookmarklet copied! Create a new bookmark and paste this as the URL.");
+        }
+    </script>
 </body>
 </html>
