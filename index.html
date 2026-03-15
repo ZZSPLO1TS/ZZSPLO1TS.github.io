@@ -1,40 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Talk.ative</title>
+    <title>Talk.ative | Social</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <style>
-        :root { --bg: #0d1117; --panel: #161b22; --accent: #58a6ff; --text: #c9d1d9; --dim: #8b949e; --border: #30363d; }
+        :root { --bg: #0d1117; --panel: #161b22; --accent: #58a6ff; --text: #c9d1d9; --dim: #8b949e; --border: #30363d; --card: #21262d; }
         body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
         
-        /* LOGIN PAGE */
-        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        /* AUTH SCREEN */
+        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; align-items: center; justify-content: center; }
         .auth-card { background: var(--panel); padding: 40px; border-radius: 12px; border: 1px solid var(--border); width: 320px; text-align: center; }
         .logo { font-size: 2.2em; font-weight: 800; color: var(--accent); margin-bottom: 10px; letter-spacing: -1px; }
         .logo span { color: #fff; }
-        
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid var(--border); background: #000; color: white; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--accent); }
-        button { width: 100%; padding: 12px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* APP LAYOUT */
-        #app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
-        #sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 15px; display: flex; flex-direction: column; }
-        #main-view { display: flex; flex-direction: column; background: var(--bg); }
+        /* LAYOUT */
+        #app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; width: 100vw; }
         
-        .sidebar-item { padding: 10px; border-radius: 6px; cursor: pointer; margin-bottom: 5px; transition: 0.2s; font-size: 0.9em; display: flex; align-items: center; gap: 10px;}
-        .sidebar-item:hover { background: #21262d; }
+        /* SIDEBAR (Independent Scroll) */
+        #sidebar { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar-content { padding: 15px; flex: 1; }
+        
+        /* MAIN VIEW */
+        #main-view { display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
+        
+        /* SCROLLABLE CONTENT */
+        #content { flex: 1; overflow-y: scroll; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+        
+        /* POSTS */
+        .post { background: var(--panel); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); }
+        .pfp { width: 32px; height: 32px; border-radius: 50%; background: #333; float: left; margin-right: 10px; object-fit: cover; }
+        .author { color: var(--accent); font-weight: 600; cursor: pointer; font-size: 0.9em; }
+        
+        /* ACCOUNT MODAL */
+        #account-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
+        .modal-box { background: var(--panel); padding: 25px; border-radius: 12px; width: 300px; border: 1px solid var(--border); }
+
+        input, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid var(--border); background: #000; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+        
+        .sidebar-item { padding: 10px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; font-size: 0.9em; }
+        .sidebar-item:hover { background: var(--card); }
         .sidebar-item.active { background: #1f6feb; color: white; }
-
-        /* CHAT & FEED */
-        #content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .post { background: var(--panel); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); animation: slideIn 0.2s ease; }
-        .author { color: var(--accent); font-weight: 600; cursor: pointer; font-size: 0.85em; margin-bottom: 4px; display: inline-block; }
-        .time { font-size: 0.7em; color: var(--dim); margin-left: 8px; }
-        
-        #input-area { padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border); display: flex; gap: 10px; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -42,28 +49,37 @@
 <div id="auth-screen">
     <div class="auth-card">
         <div class="logo">Talk<span>.ative</span></div>
-        <p style="color: var(--dim); font-size: 0.9em; margin-bottom: 25px;">Decentralized Social Node</p>
         <input type="text" id="login-user" placeholder="Username">
-        <input type="password" id="login-pass" placeholder="Password">
-        <button onclick="doLogin()">Enter App</button>
+        <button onclick="doLogin()">Enter</button>
+    </div>
+</div>
+
+<div id="account-modal">
+    <div class="modal-box">
+        <h3>Account Settings</h3>
+        <input type="text" id="set-pfp" placeholder="PFP Image URL">
+        <textarea id="set-bio" placeholder="Write a short bio..."></textarea>
+        <button onclick="saveAccount()">Save & Close</button>
     </div>
 </div>
 
 <div id="app" style="display:none">
     <div id="sidebar">
-        <div class="logo" style="font-size: 1.5em; margin-bottom: 20px;">Talk<span>.ative</span></div>
-        <div class="sidebar-item active" onclick="loadRoom('global_v4', this)">🌐 Global Square</div>
-        <div style="margin: 15px 0 10px 10px; font-size: 0.75em; color: var(--dim); font-weight: bold; letter-spacing: 1px;">DIRECT MESSAGES</div>
-        <div id="friends-list"></div>
-        <div style="margin-top: auto; padding: 10px; font-size: 0.8em; border-top: 1px solid var(--border);">
-            Logged in as: <b id="user-display" style="color:var(--accent)"></b>
+        <div class="sidebar-content">
+            <div class="logo" style="font-size: 1.5em; margin-bottom: 20px;">Talk<span>.ative</span></div>
+            <div class="sidebar-item active" onclick="loadRoom('global_v5', this)">🌐 Global Square</div>
+            <div class="sidebar-item" onclick="document.getElementById('account-modal').style.display='flex'">⚙️ Settings</div>
+            
+            <div style="margin: 20px 0 10px 0; font-size: 0.7em; color: var(--dim); font-weight: bold; letter-spacing: 1px;">DIRECT MESSAGES</div>
+            <div id="friends-list"></div>
         </div>
     </div>
+
     <div id="main-view">
         <div id="content"></div>
-        <div id="input-area">
-            <input type="text" id="msg-input" placeholder="Write something...">
-            <button onclick="sendData()" style="width:70px">SEND</button>
+        <div style="padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border); display: flex; gap: 10px;">
+            <input type="text" id="msg-input" placeholder="Type a message..." style="margin:0">
+            <button onclick="sendData()" style="width:80px; margin:0">SEND</button>
         </div>
     </div>
 </div>
@@ -71,43 +87,58 @@
 <script>
     const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
     let currentUser = localStorage.getItem('talkative_user');
-    let currentRoom = 'global_v4';
+    let currentRoom = 'global_v5';
 
-    // 1. LOGIN HANDLING
+    // 1. AUTH & ACCOUNT
     if(currentUser) {
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app').style.display = 'grid';
-        document.getElementById('user-display').innerText = '@' + currentUser;
         loadRoom(currentRoom);
     }
 
     function doLogin() {
         const u = document.getElementById('login-user').value.trim().toLowerCase();
-        if(u.length < 2) return alert("Username too short");
+        if(u.length < 2) return alert("Too short");
         localStorage.setItem('talkative_user', u);
         location.reload();
     }
 
-    // 2. CORE MESSAGING
+    function saveAccount() {
+        const pfp = document.getElementById('set-pfp').value;
+        const bio = document.getElementById('set-bio').value;
+        gun.get('user_profiles').get(currentUser).put({ pfp, bio });
+        document.getElementById('account-modal').style.display = 'none';
+    }
+
+    // 2. MESSAGING
     function loadRoom(targetRoom, el) {
         currentRoom = targetRoom;
-        document.getElementById('content').innerHTML = '';
+        const container = document.getElementById('content');
+        container.innerHTML = '';
         
-        // Update Sidebar UI
-        document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-        if(el) el.classList.add('active');
+        if(el) {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
 
         gun.get(currentRoom).map().once((data, id) => {
             if(!data || !data.text) return;
-            const div = document.createElement('div');
-            div.className = 'post';
-            div.innerHTML = `
-                <div class="author" onclick="openDM('${data.user}')">@${data.user}</div>
-                <span class="time">${new Date(data.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-                <div style="margin-top:5px">${data.text}</div>
-            `;
-            document.getElementById('content').appendChild(div);
-            document.getElementById('content').scrollTop = document.getElementById('content').scrollHeight;
+            
+            const post = document.createElement('div');
+            post.className = 'post';
+            
+            // Fetch author profile data
+            gun.get('user_profiles').get(data.user).once(prof => {
+                const pfpImg = prof && prof.pfp ? prof.pfp : 'https://api.dicebear.com/7.x/identicon/svg?seed=' + data.user;
+                post.innerHTML = `
+                    <img src="${pfpImg}" class="pfp">
+                    <div class="author" onclick="openDM('${data.user}')">@${data.user}</div>
+                    <div style="margin-top:4px; font-size:0.95em;">${data.text}</div>
+                `;
+            });
+
+            container.appendChild(post);
+            container.scrollTop = container.scrollHeight;
         });
     }
 
@@ -122,12 +153,11 @@
         input.value = '';
     }
 
-    // 3. DM SYSTEM
+    // 3. DM LOGIC
     function openDM(target) {
         if(target === currentUser) return;
-        const roomID = [currentUser, target].sort().join('_dm_');
+        const roomID = [currentUser, target].sort().join('_dm_v2_');
         
-        // Add to sidebar if not already there
         if(!document.getElementById('dm-'+target)) {
             const div = document.createElement('div');
             div.id = 'dm-'+target;
