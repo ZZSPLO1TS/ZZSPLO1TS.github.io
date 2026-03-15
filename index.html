@@ -3,143 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Clone</title>
+    <title>Telegram Clone with Login</title>
     <style>
-        /* CSS - The Telegram Look */
-        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100%; background-color: #e6ebee; }
+        /* CSS Reset & Basics */
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; height: 100%; background-color: #e6ebee; overflow: hidden; }
         
-        .app-container { display: flex; height: 100vh; max-width: 1200px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        /* Login Screen */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #517da2; display: flex; justify-content: center; align-items: center; z-index: 2000;
+        }
+        .login-box {
+            background: white; padding: 30px; border-radius: 15px; width: 300px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .login-box input {
+            width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;
+        }
+        .login-box button {
+            width: 100%; padding: 12px; background: #517da2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
+        }
+
+        /* App Layout */
+        .app-container { display: flex; height: 100vh; visibility: hidden; } /* Hidden until login */
 
         /* Sidebar */
         .sidebar { width: 30%; background: #ffffff; border-right: 1px solid #dfe5e9; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 15px; background: #517da2; color: white; font-weight: bold; }
-        .chat-list { overflow-y: auto; flex-grow: 1; }
-        .chat-item { padding: 15px; display: flex; align-items: center; cursor: pointer; border-bottom: 1px solid #f2f2f2; }
-        .chat-item:hover { background: #f4f4f5; }
-        .avatar { width: 45px; height: 45px; background: #64b5f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 12px; }
-
-        /* Main Chat */
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #cad3d8; }
-        .chat-header { padding: 10px 20px; background: #ffffff; border-bottom: 1px solid #dfe5e9; cursor: pointer; }
-        .chat-header h3 { margin: 0; font-size: 16px; color: #222; }
-        .status { font-size: 12px; color: #7f8c8d; }
-
+        .sidebar-header { padding: 15px; background: #517da2; color: white; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Chat Area */
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #cad3d8; position: relative; }
+        .chat-header { padding: 10px 20px; background: #ffffff; border-bottom: 1px solid #dfe5e9; cursor: pointer; display: flex; align-items: center; gap: 10px;}
         .message-log { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
-        /* Message Bubbles */
-        .msg { max-width: 70%; padding: 8px 12px; border-radius: 12px; font-size: 14px; position: relative; word-wrap: break-word; }
+        /* Bubbles */
+        .msg { max-width: 70%; padding: 8px 12px; border-radius: 12px; font-size: 14px; position: relative; }
         .incoming { background: #ffffff; align-self: flex-start; border-bottom-left-radius: 2px; }
         .outgoing { background: #effdde; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         .time { font-size: 10px; color: #a0a0a0; margin-left: 8px; float: right; margin-top: 5px; }
 
-        /* Input Area */
         .chat-input { padding: 15px; background: #ffffff; display: flex; gap: 10px; }
-        input[type="text"] { flex-grow: 1; border: 1px solid #ddd; padding: 10px; border-radius: 20px; outline: none; }
-        button { background: none; border: none; color: #517da2; font-weight: bold; cursor: pointer; }
+        .chat-input input { flex-grow: 1; border: 1px solid #ddd; padding: 10px; border-radius: 20px; outline: none; }
 
-        /* Account Profile Overlay */
-        .profile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .profile-card { background: white; width: 300px; padding: 20px; border-radius: 10px; text-align: center; position: relative; }
-        .profile-pic-large { width: 80px; height: 80px; background: #517da2; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; }
-        .close-btn { position: absolute; top: 10px; right: 10px; font-size: 20px; cursor: pointer; border: none; background: none; }
+        /* Profile Overlay */
+        .profile-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .profile-card { background: white; width: 280px; padding: 25px; border-radius: 15px; text-align: center; position: relative; }
+        .profile-avatar { width: 70px; height: 70px; background: #517da2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 10px; }
+        .logout-btn { color: red; cursor: pointer; margin-top: 15px; background: none; border: none; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div id="login-screen">
+    <div class="login-box">
+        <h2 style="color:#517da2">Welcome</h2>
+        <p>Set up your profile</p>
+        <input type="text" id="login-user" placeholder="Enter Username...">
+        <input type="text" id="login-bio" placeholder="Enter Bio...">
+        <button onclick="doLogin()">START CHATTING</button>
+    </div>
+</div>
+
+<div class="app-container" id="app">
     <aside class="sidebar">
-        <header class="sidebar-header">Telegram Clone</header>
-        <div class="chat-list">
-            <div class="chat-item" onclick="toggleProfile()">
-                <div class="avatar">U</div>
-                <div class="chat-info">
-                    <h4>User Account</h4>
-                    <p style="margin:0; font-size:12px; color:#888;">View your profile</p>
-                </div>
-            </div>
+        <header class="sidebar-header">
+            <span>TeleClone</span>
+            <small onclick="toggleProfile()" style="cursor:pointer">Settings</small>
+        </header>
+        <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap:10px;">
+            <div id="side-avatar" style="width:35px; height:35px; background:#517da2; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">?</div>
+            <strong id="side-name">User</strong>
         </div>
     </aside>
 
     <main class="chat-area">
         <header class="chat-header" onclick="toggleProfile()">
-            <h3 id="target-name">Cloud Save Chat</h3>
-            <span class="status">online</span>
+            <div id="header-avatar" style="width:35px; height:35px; background:#517da2; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">?</div>
+            <div>
+                <h3 id="chat-user-title" style="margin:0; font-size:15px;">User Name</h3>
+                <span style="font-size:11px; color:green;">online</span>
+            </div>
         </header>
         
-        <div class="message-log" id="message-log">
-            </div>
+        <div class="message-log" id="msg-log">
+            <div class="msg incoming">Welcome to your private chat log! <span class="time">Now</span></div>
+        </div>
 
         <div class="chat-input">
-            <input type="text" id="msg-input" placeholder="Write a message..." onkeypress="handleKey(event)">
-            <button onclick="sendMessage()">SEND</button>
+            <input type="text" id="msg-input" placeholder="Message..." onkeypress="if(event.key==='Enter') send()">
+            <button onclick="send()" style="color:#517da2; font-weight:bold; border:none; background:none; cursor:pointer;">SEND</button>
+        </div>
+
+        <div id="profile-page" class="profile-overlay" onclick="if(event.target == this) toggleProfile()">
+            <div class="profile-card">
+                <div class="profile-avatar" id="prof-avatar">?</div>
+                <h2 id="prof-name" style="margin:5px 0;">Name</h2>
+                <p id="prof-bio" style="color:#666; font-style:italic;">Bio goes here</p>
+                <hr>
+                <button class="logout-btn" onclick="doLogout()">Delete Account & Data</button>
+            </div>
         </div>
     </main>
 </div>
 
-<div id="profile-page" class="profile-overlay">
-    <div class="profile-card">
-        <button class="close-btn" onclick="toggleProfile()">×</button>
-        <div class="profile-pic-large">U</div>
-        <h2 id="prof-name">User Account</h2>
-        <p>@github_user</p>
-        <p style="color: #777;">Bio: Coding through a proxy!</p>
-        <button onclick="clearLogs()" style="color: red; margin-top: 20px;">Clear Chat History</button>
-    </div>
-</div>
-
 <script>
-    const logContainer = document.getElementById('message-log');
-    const msgInput = document.getElementById('msg-input');
+    // --- Logic ---
+    const app = document.getElementById('app');
+    const loginScreen = document.getElementById('login-screen');
 
-    // 1. Logging System: Load messages from LocalStorage on startup
+    // Check if user is already logged in
     window.onload = () => {
-        const savedMessages = JSON.parse(localStorage.getItem('chatLogs')) || [];
-        savedMessages.forEach(msg => renderMessage(msg.text, msg.type, msg.time));
+        const user = localStorage.getItem('chat_user');
+        if (user) {
+            setupUI(JSON.parse(user));
+        }
     };
 
-    function sendMessage() {
-        const text = msgInput.value.trim();
-        if (text === "") return;
+    function doLogin() {
+        const name = document.getElementById('login-user').value.trim();
+        const bio = document.getElementById('login-bio').value.trim() || "No bio yet.";
+        
+        if (!name) return alert("Please enter a username");
+
+        const userData = { name, bio };
+        localStorage.setItem('chat_user', JSON.stringify(userData));
+        setupUI(userData);
+    }
+
+    function setupUI(user) {
+        loginScreen.style.display = 'none';
+        app.style.visibility = 'visible';
+        
+        // Update UI elements with user data
+        document.getElementById('side-name').innerText = user.name;
+        document.getElementById('chat-user-title').innerText = user.name;
+        document.getElementById('prof-name').innerText = user.name;
+        document.getElementById('prof-bio').innerText = user.bio;
+        
+        const initial = user.name.charAt(0).toUpperCase();
+        document.getElementById('side-avatar').innerText = initial;
+        document.getElementById('header-avatar').innerText = initial;
+        document.getElementById('prof-avatar').innerText = initial;
+
+        loadMessages();
+    }
+
+    function send() {
+        const input = document.getElementById('msg-input');
+        if (!input.value.trim()) return;
 
         const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        renderMsg(input.value, 'outgoing', time);
+        saveMsg(input.value, 'outgoing', time);
         
-        // Render and Save
-        renderMessage(text, 'outgoing', time);
-        saveMessage(text, 'outgoing', time);
-
-        msgInput.value = "";
-        logContainer.scrollTop = logContainer.scrollHeight;
+        input.value = "";
+        const log = document.getElementById('msg-log');
+        log.scrollTop = log.scrollHeight;
     }
 
-    function renderMessage(text, type, time) {
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add('msg', type);
-        msgDiv.innerHTML = `${text} <span class="time">${time}</span>`;
-        logContainer.appendChild(msgDiv);
+    function renderMsg(text, type, time) {
+        const log = document.getElementById('msg-log');
+        const div = document.createElement('div');
+        div.className = `msg ${type}`;
+        div.innerHTML = `${text} <span class="time">${time}</span>`;
+        log.appendChild(div);
     }
 
-    function saveMessage(text, type, time) {
-        const savedMessages = JSON.parse(localStorage.getItem('chatLogs')) || [];
-        savedMessages.push({ text, type, time });
-        localStorage.setItem('chatLogs', JSON.stringify(savedMessages));
+    function saveMsg(text, type, time) {
+        const logs = JSON.parse(localStorage.getItem('chat_history') || '[]');
+        logs.push({text, type, time});
+        localStorage.setItem('chat_history', JSON.stringify(logs));
     }
 
-    function handleKey(e) {
-        if (e.key === 'Enter') sendMessage();
+    function loadMessages() {
+        const logs = JSON.parse(localStorage.getItem('chat_history') || '[]');
+        logs.forEach(m => renderMsg(m.text, m.type, m.time));
     }
 
     function toggleProfile() {
-        const prof = document.getElementById('profile-page');
-        prof.style.display = (prof.style.display === 'flex') ? 'none' : 'flex';
+        const p = document.getElementById('profile-page');
+        p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    function clearLogs() {
-        if(confirm("Delete all messages?")) {
-            localStorage.removeItem('chatLogs');
+    function doLogout() {
+        if(confirm("This will delete your account and all message history. Continue?")) {
+            localStorage.clear();
             location.reload();
         }
     }
 </script>
-
 </body>
 </html>
