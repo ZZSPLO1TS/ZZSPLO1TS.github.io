@@ -1,177 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Talk.ative | Social</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Clone</title>
     <style>
-        :root { --bg: #0d1117; --panel: #161b22; --accent: #58a6ff; --text: #c9d1d9; --dim: #8b949e; --border: #30363d; --card: #21262d; }
-        body { margin: 0; font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        /* CSS - The Telegram Look */
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100%; background-color: #e6ebee; }
         
-        /* AUTH SCREEN */
-        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-        .auth-card { background: var(--panel); padding: 40px; border-radius: 12px; border: 1px solid var(--border); width: 320px; text-align: center; }
-        .logo { font-size: 2.2em; font-weight: 800; color: var(--accent); margin-bottom: 10px; letter-spacing: -1px; }
-        .logo span { color: #fff; }
+        .app-container { display: flex; height: 100vh; max-width: 1200px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
 
-        /* LAYOUT */
-        #app { display: grid; grid-template-columns: 280px 1fr; height: 100vh; width: 100vw; }
-        
-        /* SIDEBAR (Independent Scroll) */
-        #sidebar { background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
-        .sidebar-content { padding: 15px; flex: 1; }
-        
-        /* MAIN VIEW */
-        #main-view { display: flex; flex-direction: column; background: var(--bg); position: relative; overflow: hidden; }
-        
-        /* SCROLLABLE CONTENT */
-        #content { flex: 1; overflow-y: scroll; padding: 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        
-        /* POSTS */
-        .post { background: var(--panel); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); }
-        .pfp { width: 32px; height: 32px; border-radius: 50%; background: #333; float: left; margin-right: 10px; object-fit: cover; }
-        .author { color: var(--accent); font-weight: 600; cursor: pointer; font-size: 0.9em; }
-        
-        /* ACCOUNT MODAL */
-        #account-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; }
-        .modal-box { background: var(--panel); padding: 25px; border-radius: 12px; width: 300px; border: 1px solid var(--border); }
+        /* Sidebar */
+        .sidebar { width: 30%; background: #ffffff; border-right: 1px solid #dfe5e9; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; background: #517da2; color: white; font-weight: bold; }
+        .chat-list { overflow-y: auto; flex-grow: 1; }
+        .chat-item { padding: 15px; display: flex; align-items: center; cursor: pointer; border-bottom: 1px solid #f2f2f2; }
+        .chat-item:hover { background: #f4f4f5; }
+        .avatar { width: 45px; height: 45px; background: #64b5f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 12px; }
 
-        input, textarea { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid var(--border); background: #000; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+        /* Main Chat */
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #cad3d8; }
+        .chat-header { padding: 10px 20px; background: #ffffff; border-bottom: 1px solid #dfe5e9; cursor: pointer; }
+        .chat-header h3 { margin: 0; font-size: 16px; color: #222; }
+        .status { font-size: 12px; color: #7f8c8d; }
+
+        .message-log { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
-        .sidebar-item { padding: 10px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; font-size: 0.9em; }
-        .sidebar-item:hover { background: var(--card); }
-        .sidebar-item.active { background: #1f6feb; color: white; }
+        /* Message Bubbles */
+        .msg { max-width: 70%; padding: 8px 12px; border-radius: 12px; font-size: 14px; position: relative; word-wrap: break-word; }
+        .incoming { background: #ffffff; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .outgoing { background: #effdde; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .time { font-size: 10px; color: #a0a0a0; margin-left: 8px; float: right; margin-top: 5px; }
+
+        /* Input Area */
+        .chat-input { padding: 15px; background: #ffffff; display: flex; gap: 10px; }
+        input[type="text"] { flex-grow: 1; border: 1px solid #ddd; padding: 10px; border-radius: 20px; outline: none; }
+        button { background: none; border: none; color: #517da2; font-weight: bold; cursor: pointer; }
+
+        /* Account Profile Overlay */
+        .profile-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .profile-card { background: white; width: 300px; padding: 20px; border-radius: 10px; text-align: center; position: relative; }
+        .profile-pic-large { width: 80px; height: 80px; background: #517da2; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; }
+        .close-btn { position: absolute; top: 10px; right: 10px; font-size: 20px; cursor: pointer; border: none; background: none; }
     </style>
 </head>
 <body>
 
-<div id="auth-screen">
-    <div class="auth-card">
-        <div class="logo">Talk<span>.ative</span></div>
-        <input type="text" id="login-user" placeholder="Username">
-        <button onclick="doLogin()">Enter</button>
-    </div>
+<div class="app-container">
+    <aside class="sidebar">
+        <header class="sidebar-header">Telegram Clone</header>
+        <div class="chat-list">
+            <div class="chat-item" onclick="toggleProfile()">
+                <div class="avatar">U</div>
+                <div class="chat-info">
+                    <h4>User Account</h4>
+                    <p style="margin:0; font-size:12px; color:#888;">View your profile</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="chat-area">
+        <header class="chat-header" onclick="toggleProfile()">
+            <h3 id="target-name">Cloud Save Chat</h3>
+            <span class="status">online</span>
+        </header>
+        
+        <div class="message-log" id="message-log">
+            </div>
+
+        <div class="chat-input">
+            <input type="text" id="msg-input" placeholder="Write a message..." onkeypress="handleKey(event)">
+            <button onclick="sendMessage()">SEND</button>
+        </div>
+    </main>
 </div>
 
-<div id="account-modal">
-    <div class="modal-box">
-        <h3>Account Settings</h3>
-        <input type="text" id="set-pfp" placeholder="PFP Image URL">
-        <textarea id="set-bio" placeholder="Write a short bio..."></textarea>
-        <button onclick="saveAccount()">Save & Close</button>
-    </div>
-</div>
-
-<div id="app" style="display:none">
-    <div id="sidebar">
-        <div class="sidebar-content">
-            <div class="logo" style="font-size: 1.5em; margin-bottom: 20px;">Talk<span>.ative</span></div>
-            <div class="sidebar-item active" onclick="loadRoom('global_v5', this)">🌐 Global Square</div>
-            <div class="sidebar-item" onclick="document.getElementById('account-modal').style.display='flex'">⚙️ Settings</div>
-            
-            <div style="margin: 20px 0 10px 0; font-size: 0.7em; color: var(--dim); font-weight: bold; letter-spacing: 1px;">DIRECT MESSAGES</div>
-            <div id="friends-list"></div>
-        </div>
-    </div>
-
-    <div id="main-view">
-        <div id="content"></div>
-        <div style="padding: 15px 20px; background: var(--panel); border-top: 1px solid var(--border); display: flex; gap: 10px;">
-            <input type="text" id="msg-input" placeholder="Type a message..." style="margin:0">
-            <button onclick="sendData()" style="width:80px; margin:0">SEND</button>
-        </div>
+<div id="profile-page" class="profile-overlay">
+    <div class="profile-card">
+        <button class="close-btn" onclick="toggleProfile()">×</button>
+        <div class="profile-pic-large">U</div>
+        <h2 id="prof-name">User Account</h2>
+        <p>@github_user</p>
+        <p style="color: #777;">Bio: Coding through a proxy!</p>
+        <button onclick="clearLogs()" style="color: red; margin-top: 20px;">Clear Chat History</button>
     </div>
 </div>
 
 <script>
-    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
-    let currentUser = localStorage.getItem('talkative_user');
-    let currentRoom = 'global_v5';
+    const logContainer = document.getElementById('message-log');
+    const msgInput = document.getElementById('msg-input');
 
-    // 1. AUTH & ACCOUNT
-    if(currentUser) {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'grid';
-        loadRoom(currentRoom);
-    }
+    // 1. Logging System: Load messages from LocalStorage on startup
+    window.onload = () => {
+        const savedMessages = JSON.parse(localStorage.getItem('chatLogs')) || [];
+        savedMessages.forEach(msg => renderMessage(msg.text, msg.type, msg.time));
+    };
 
-    function doLogin() {
-        const u = document.getElementById('login-user').value.trim().toLowerCase();
-        if(u.length < 2) return alert("Too short");
-        localStorage.setItem('talkative_user', u);
-        location.reload();
-    }
+    function sendMessage() {
+        const text = msgInput.value.trim();
+        if (text === "") return;
 
-    function saveAccount() {
-        const pfp = document.getElementById('set-pfp').value;
-        const bio = document.getElementById('set-bio').value;
-        gun.get('user_profiles').get(currentUser).put({ pfp, bio });
-        document.getElementById('account-modal').style.display = 'none';
-    }
-
-    // 2. MESSAGING
-    function loadRoom(targetRoom, el) {
-        currentRoom = targetRoom;
-        const container = document.getElementById('content');
-        container.innerHTML = '';
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         
-        if(el) {
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-        }
+        // Render and Save
+        renderMessage(text, 'outgoing', time);
+        saveMessage(text, 'outgoing', time);
 
-        gun.get(currentRoom).map().once((data, id) => {
-            if(!data || !data.text) return;
-            
-            const post = document.createElement('div');
-            post.className = 'post';
-            
-            // Fetch author profile data
-            gun.get('user_profiles').get(data.user).once(prof => {
-                const pfpImg = prof && prof.pfp ? prof.pfp : 'https://api.dicebear.com/7.x/identicon/svg?seed=' + data.user;
-                post.innerHTML = `
-                    <img src="${pfpImg}" class="pfp">
-                    <div class="author" onclick="openDM('${data.user}')">@${data.user}</div>
-                    <div style="margin-top:4px; font-size:0.95em;">${data.text}</div>
-                `;
-            });
-
-            container.appendChild(post);
-            container.scrollTop = container.scrollHeight;
-        });
+        msgInput.value = "";
+        logContainer.scrollTop = logContainer.scrollHeight;
     }
 
-    function sendData() {
-        const input = document.getElementById('msg-input');
-        if(!input.value) return;
-        gun.get(currentRoom).set({
-            user: currentUser,
-            text: input.value,
-            time: Date.now()
-        });
-        input.value = '';
+    function renderMessage(text, type, time) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('msg', type);
+        msgDiv.innerHTML = `${text} <span class="time">${time}</span>`;
+        logContainer.appendChild(msgDiv);
     }
 
-    // 3. DM LOGIC
-    function openDM(target) {
-        if(target === currentUser) return;
-        const roomID = [currentUser, target].sort().join('_dm_v2_');
-        
-        if(!document.getElementById('dm-'+target)) {
-            const div = document.createElement('div');
-            div.id = 'dm-'+target;
-            div.className = 'sidebar-item';
-            div.innerHTML = `💬 @${target}`;
-            div.onclick = () => loadRoom(roomID, div);
-            document.getElementById('friends-list').appendChild(div);
-            loadRoom(roomID, div);
-        } else {
-            loadRoom(roomID, document.getElementById('dm-'+target));
+    function saveMessage(text, type, time) {
+        const savedMessages = JSON.parse(localStorage.getItem('chatLogs')) || [];
+        savedMessages.push({ text, type, time });
+        localStorage.setItem('chatLogs', JSON.stringify(savedMessages));
+    }
+
+    function handleKey(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    function toggleProfile() {
+        const prof = document.getElementById('profile-page');
+        prof.style.display = (prof.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function clearLogs() {
+        if(confirm("Delete all messages?")) {
+            localStorage.removeItem('chatLogs');
+            location.reload();
         }
     }
-
-    document.getElementById('msg-input').onkeypress = (e) => { if(e.key === 'Enter') sendData(); };
 </script>
 
 </body>
