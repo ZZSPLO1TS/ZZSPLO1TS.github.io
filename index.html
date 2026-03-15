@@ -3,194 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Clone with Login</title>
+    <title>Tele-Private Friends</title>
     <style>
-        /* CSS Reset & Basics */
-        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; height: 100%; background-color: #e6ebee; overflow: hidden; }
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; height: 100%; background: #e6ebee; overflow: hidden; }
         
-        /* Login Screen */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #517da2; display: flex; justify-content: center; align-items: center; z-index: 2000;
-        }
-        .login-box {
-            background: white; padding: 30px; border-radius: 15px; width: 300px; text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .login-box input {
-            width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;
-        }
-        .login-box button {
-            width: 100%; padding: 12px; background: #517da2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;
-        }
+        /* Auth Screen */
+        #auth-screen { position: fixed; inset: 0; background: #517da2; display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .auth-box { background: white; padding: 30px; border-radius: 15px; width: 300px; text-align: center; }
+        input { width: 90%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 8px; }
+        button { padding: 10px 20px; background: #517da2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         /* App Layout */
-        .app-container { display: flex; height: 100vh; visibility: hidden; } /* Hidden until login */
+        #app { display: none; height: 100vh; flex-direction: row; }
 
         /* Sidebar */
-        .sidebar { width: 30%; background: #ffffff; border-right: 1px solid #dfe5e9; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 15px; background: #517da2; color: white; display: flex; justify-content: space-between; align-items: center; }
-        
+        .sidebar { width: 280px; background: white; border-right: 1px solid #dfe5e9; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; background: #517da2; color: white; display: flex; justify-content: space-between; }
+        .friend-list { flex-grow: 1; overflow-y: auto; }
+        .friend-item { padding: 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .friend-item:hover, .friend-item.active { background: #f0f7ff; }
+        .avatar-sm { width: 35px; height: 35px; background: #ccc; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
+
         /* Chat Area */
-        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #cad3d8; position: relative; }
-        .chat-header { padding: 10px 20px; background: #ffffff; border-bottom: 1px solid #dfe5e9; cursor: pointer; display: flex; align-items: center; gap: 10px;}
-        .message-log { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #cad3d8; }
+        .chat-header { padding: 10px 20px; background: white; border-bottom: 1px solid #ddd; font-weight: bold; }
+        .message-log { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+        /* Message & Reply UI */
+        .msg { max-width: 70%; padding: 10px; border-radius: 12px; font-size: 14px; position: relative; cursor: pointer; }
+        .outgoing { background: #effdde; align-self: flex-end; }
+        .incoming { background: white; align-self: flex-start; }
+        .reply-preview { font-size: 11px; background: rgba(0,0,0,0.05); padding: 5px; border-left: 3px solid #517da2; margin-bottom: 5px; border-radius: 4px; color: #555; }
         
-        /* Bubbles */
-        .msg { max-width: 70%; padding: 8px 12px; border-radius: 12px; font-size: 14px; position: relative; }
-        .incoming { background: #ffffff; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .outgoing { background: #effdde; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .time { font-size: 10px; color: #a0a0a0; margin-left: 8px; float: right; margin-top: 5px; }
+        /* Reply Bar (Above Input) */
+        #reply-bar { display: none; background: #f9f9f9; padding: 8px 15px; border-top: 1px solid #ddd; font-size: 12px; justify-content: space-between; align-items: center; }
 
-        .chat-input { padding: 15px; background: #ffffff; display: flex; gap: 10px; }
-        .chat-input input { flex-grow: 1; border: 1px solid #ddd; padding: 10px; border-radius: 20px; outline: none; }
+        .input-area { padding: 15px; background: white; display: flex; gap: 10px; }
+        #msg-input { flex-grow: 1; border-radius: 20px; border: 1px solid #ddd; padding: 10px 15px; }
 
-        /* Profile Overlay */
-        .profile-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-        .profile-card { background: white; width: 280px; padding: 25px; border-radius: 15px; text-align: center; position: relative; }
-        .profile-avatar { width: 70px; height: 70px; background: #517da2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 10px; }
-        .logout-btn { color: red; cursor: pointer; margin-top: 15px; background: none; border: none; text-decoration: underline; }
+        /* Modals */
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; justify-content: center; align-items: center; }
+        .modal { background: white; padding: 25px; border-radius: 15px; width: 280px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <h2 style="color:#517da2">Welcome</h2>
-        <p>Set up your profile</p>
-        <input type="text" id="login-user" placeholder="Enter Username...">
-        <input type="text" id="login-bio" placeholder="Enter Bio...">
-        <button onclick="doLogin()">START CHATTING</button>
+<div id="auth-screen">
+    <div class="auth-box">
+        <h2 style="color:#517da2">TeleClone</h2>
+        <input type="text" id="reg-username" placeholder="Username">
+        <input type="password" id="reg-password" placeholder="Password">
+        <button onclick="handleAuth()">LOGIN</button>
     </div>
 </div>
 
-<div class="app-container" id="app">
+<div id="app">
     <aside class="sidebar">
         <header class="sidebar-header">
-            <span>TeleClone</span>
-            <small onclick="toggleProfile()" style="cursor:pointer">Settings</small>
+            <span>Chats</span>
+            <button onclick="showAddFriend()" style="background:none; color:white; font-size:18px;">+</button>
         </header>
-        <div style="padding: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap:10px;">
-            <div id="side-avatar" style="width:35px; height:35px; background:#517da2; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">?</div>
-            <strong id="side-name">User</strong>
-        </div>
+        <div class="friend-list" id="friend-list">
+            </div>
+        <div style="padding:10px; font-size:11px; color:#999; text-align:center;">Double-click message to reply</div>
     </aside>
 
     <main class="chat-area">
-        <header class="chat-header" onclick="toggleProfile()">
-            <div id="header-avatar" style="width:35px; height:35px; background:#517da2; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">?</div>
-            <div>
-                <h3 id="chat-user-title" style="margin:0; font-size:15px;">User Name</h3>
-                <span style="font-size:11px; color:green;">online</span>
-            </div>
-        </header>
+        <header class="chat-header" id="active-chat-title">Select a friend to start chatting</header>
         
-        <div class="message-log" id="msg-log">
-            <div class="msg incoming">Welcome to your private chat log! <span class="time">Now</span></div>
+        <div class="message-log" id="msg-log"></div>
+
+        <div id="reply-bar">
+            <span id="reply-text">Replying to...</span>
+            <button onclick="cancelReply()" style="background:none; border:none; color:red; cursor:pointer;">×</button>
         </div>
 
-        <div class="chat-input">
+        <div class="input-area">
             <input type="text" id="msg-input" placeholder="Message..." onkeypress="if(event.key==='Enter') send()">
-            <button onclick="send()" style="color:#517da2; font-weight:bold; border:none; background:none; cursor:pointer;">SEND</button>
-        </div>
-
-        <div id="profile-page" class="profile-overlay" onclick="if(event.target == this) toggleProfile()">
-            <div class="profile-card">
-                <div class="profile-avatar" id="prof-avatar">?</div>
-                <h2 id="prof-name" style="margin:5px 0;">Name</h2>
-                <p id="prof-bio" style="color:#666; font-style:italic;">Bio goes here</p>
-                <hr>
-                <button class="logout-btn" onclick="doLogout()">Delete Account & Data</button>
-            </div>
+            <button onclick="send()">SEND</button>
         </div>
     </main>
 </div>
 
+<div id="friend-modal" class="overlay">
+    <div class="modal">
+        <h3>Add Friend</h3>
+        <input type="text" id="friend-name-input" placeholder="Enter Username...">
+        <button onclick="addFriend()">ADD</button>
+        <button onclick="closeModals()" style="background:#999">CANCEL</button>
+    </div>
+</div>
+
 <script>
-    // --- Logic ---
-    const app = document.getElementById('app');
-    const loginScreen = document.getElementById('login-screen');
+    let currentUser = "";
+    let activeFriend = "";
+    let replyTo = null;
 
-    // Check if user is already logged in
-    window.onload = () => {
-        const user = localStorage.getItem('chat_user');
-        if (user) {
-            setupUI(JSON.parse(user));
-        }
-    };
-
-    function doLogin() {
-        const name = document.getElementById('login-user').value.trim();
-        const bio = document.getElementById('login-bio').value.trim() || "No bio yet.";
-        
-        if (!name) return alert("Please enter a username");
-
-        const userData = { name, bio };
-        localStorage.setItem('chat_user', JSON.stringify(userData));
-        setupUI(userData);
+    // --- AUTH ---
+    function handleAuth() {
+        const u = document.getElementById('reg-username').value.trim();
+        if(!u) return;
+        currentUser = u;
+        localStorage.setItem('tele_user', u);
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        loadFriends();
     }
 
-    function setupUI(user) {
-        loginScreen.style.display = 'none';
-        app.style.visibility = 'visible';
-        
-        // Update UI elements with user data
-        document.getElementById('side-name').innerText = user.name;
-        document.getElementById('chat-user-title').innerText = user.name;
-        document.getElementById('prof-name').innerText = user.name;
-        document.getElementById('prof-bio').innerText = user.bio;
-        
-        const initial = user.name.charAt(0).toUpperCase();
-        document.getElementById('side-avatar').innerText = initial;
-        document.getElementById('header-avatar').innerText = initial;
-        document.getElementById('prof-avatar').innerText = initial;
+    // --- FRIEND SYSTEM ---
+    function showAddFriend() { document.getElementById('friend-modal').style.display = 'flex'; }
+    function closeModals() { document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none'); }
 
+    function addFriend() {
+        const name = document.getElementById('friend-name-input').value.trim();
+        if(!name || name === currentUser) return alert("Invalid name");
+        
+        let friends = JSON.parse(localStorage.getItem(currentUser + '_friends') || '[]');
+        if(!friends.includes(name)) friends.push(name);
+        
+        localStorage.setItem(currentUser + '_friends', JSON.stringify(friends));
+        document.getElementById('friend-name-input').value = "";
+        closeModals();
+        loadFriends();
+    }
+
+    function loadFriends() {
+        const list = document.getElementById('friend-list');
+        list.innerHTML = "";
+        const friends = JSON.parse(localStorage.getItem(currentUser + '_friends') || '[]');
+        friends.forEach(f => {
+            const div = document.createElement('div');
+            div.className = `friend-item ${f === activeFriend ? 'active' : ''}`;
+            div.innerHTML = `<div class="avatar-sm">${f[0].toUpperCase()}</div> <span>${f}</span>`;
+            div.onclick = () => selectFriend(f);
+            list.appendChild(div);
+        });
+    }
+
+    function selectFriend(name) {
+        activeFriend = name;
+        document.getElementById('active-chat-title').innerText = `Chat with ${name}`;
+        loadFriends(); // Refresh active class
         loadMessages();
     }
 
+    // --- CHAT & REPLY ---
     function send() {
+        if(!activeFriend) return alert("Select a friend first!");
         const input = document.getElementById('msg-input');
-        if (!input.value.trim()) return;
+        const text = input.value.trim();
+        if(!text) return;
 
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        renderMsg(input.value, 'outgoing', time);
-        saveMsg(input.value, 'outgoing', time);
+        const msg = {
+            sender: currentUser,
+            text: text,
+            replyTo: replyTo, // Attach the text we are replying to
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        const key = `chat_${currentUser}_${activeFriend}`;
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
+        history.push(msg);
+        localStorage.setItem(key, JSON.stringify(history));
         
+        cancelReply();
         input.value = "";
-        const log = document.getElementById('msg-log');
-        log.scrollTop = log.scrollHeight;
-    }
-
-    function renderMsg(text, type, time) {
-        const log = document.getElementById('msg-log');
-        const div = document.createElement('div');
-        div.className = `msg ${type}`;
-        div.innerHTML = `${text} <span class="time">${time}</span>`;
-        log.appendChild(div);
-    }
-
-    function saveMsg(text, type, time) {
-        const logs = JSON.parse(localStorage.getItem('chat_history') || '[]');
-        logs.push({text, type, time});
-        localStorage.setItem('chat_history', JSON.stringify(logs));
+        loadMessages();
     }
 
     function loadMessages() {
-        const logs = JSON.parse(localStorage.getItem('chat_history') || '[]');
-        logs.forEach(m => renderMsg(m.text, m.type, m.time));
+        const log = document.getElementById('msg-log');
+        log.innerHTML = "";
+        const key = `chat_${currentUser}_${activeFriend}`;
+        const history = JSON.parse(localStorage.getItem(key) || '[]');
+
+        history.forEach(m => {
+            const div = document.createElement('div');
+            div.className = `msg ${m.sender === currentUser ? 'outgoing' : 'incoming'}`;
+            div.ondblclick = () => setReply(m.text);
+            
+            let replyHTML = m.replyTo ? `<div class="reply-preview">Replying to: "${m.replyTo}"</div>` : "";
+            div.innerHTML = `${replyHTML}${m.text} <span style="font-size:9px; color:#999; margin-left:10px;">${m.time}</span>`;
+            log.appendChild(div);
+        });
+        log.scrollTop = log.scrollHeight;
     }
 
-    function toggleProfile() {
-        const p = document.getElementById('profile-page');
-        p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
+    function setReply(text) {
+        replyTo = text;
+        document.getElementById('reply-bar').style.display = 'flex';
+        document.getElementById('reply-text').innerText = `Replying to: "${text.substring(0, 20)}..."`;
+        document.getElementById('msg-input').focus();
     }
 
-    function doLogout() {
-        if(confirm("This will delete your account and all message history. Continue?")) {
-            localStorage.clear();
-            location.reload();
+    function cancelReply() {
+        replyTo = null;
+        document.getElementById('reply-bar').style.display = 'none';
+    }
+
+    // Load session if exists
+    window.onload = () => {
+        const saved = localStorage.getItem('tele_user');
+        if(saved) {
+            currentUser = saved;
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            loadFriends();
         }
-    }
+    };
 </script>
 </body>
 </html>
