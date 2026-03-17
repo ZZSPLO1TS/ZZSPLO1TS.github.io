@@ -1,49 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZZSPLO1TS Hub</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header>
-        <pre>
- _______  _______  _______  _______  ___      _______  ___   _______  _______ 
-|       ||       ||       ||       ||   |    |       ||   | |       ||       |
-|____   ||____   ||  _____||    _  ||   |    |   _   ||   | |_     _||  _____|
- ____|  | ____|  || |_____ |   |_| ||   |    |  | |  ||   |   |   |  | |_____ 
-| ______|| ______||_____  ||    ___||   |___ |  |_|  ||   |   |   |  |_____  |
-| |_____ | |_____  _____| ||   |    |       ||       ||   |   |   |   _____| |
-|_______||_______||_______||___|    |_______||_______||___|   |___|  |_______|
-        </pre>
-        <h1>Bookmarklet Directory</h1>
-    </header>
-
-    <main id="container">
-        <div class="card">
-            <h3>Script Injector</h3>
-            <p>Injects custom JS into the current page.</p>
-            <button onclick="copyScript('injector')">Copy Bookmarklet</button>
-        </div>
-
-        <div class="card">
-            <h3>UI Overlay</h3>
-            <p>Shows the ZZSPLO1TS custom interface.</p>
-            <button onclick="copyScript('ui')">Copy Bookmarklet</button>
-        </div>
-    </main>
-
-    <script>
-        const scripts = {
-            injector: "javascript:(function(){/* your code here */})();",
-            ui: "javascript:(function(){/* your code here */})();"
-        };
-
-        function copyScript(id) {
-            navigator.clipboard.writeText(scripts[id]);
-            alert("Bookmarklet copied! Create a new bookmark and paste this as the URL.");
-        }
-    </script>
-</body>
+<html>
+    <head>
+        <title>Pull the Plug on Securly</title>
+        <link rel="icon" href="https://raw.githubusercontent.com/Epicminer256/Securascramble/main/IMG/favicon.ico">
+        <style type="text/css">
+            body {
+                color: #000;
+                font-family: 'Roboto', monospace;
+            }
+            #cow{
+                display: block;
+                background-image: url("https://github.com/Epicminer256/Securascramble/blob/main/IMG/background.gif?raw=true");
+                background-position: center;
+                background-repeat: no-repeat;
+                width: 100%;
+                height: 280px;
+                font-size: 0px;
+            }
+            p {
+                font-size: 30px;
+                margin: 0;
+                padding: 20px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Drag this cow to your bookmarkbar (Use Ctrl+Shift+B to show/hide bookmarkbar)</p>
+        <a onclick="event.preventDefault();alert('Drag and drop me to you bookmark bar, don\'t click me!')" href="javascript:fetch('https://raw.githubusercontent.com/Epicminer256/Securascramble/main/kill.js').then(r => r.text()).then(r => eval(r))">
+            <div id="cow">
+                Killswitch for Securly
+            </div>
+        </a>
+    </body>
 </html>
