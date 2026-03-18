@@ -1,1 +1,1 @@
-hi
+Bruh, i hate school
