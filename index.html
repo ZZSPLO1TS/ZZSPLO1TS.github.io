@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Discord Web Clone</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Web Chat</title>
   <style>
     :root {
       --bg-primary: #313338;
@@ -15,13 +15,14 @@
       --brand: #5865f2;
       --brand-hover: #4752c4;
       --green: #23a55a;
+      --danger: #da373c;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'gg sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
     body {
@@ -32,8 +33,8 @@
       overflow: hidden;
     }
 
-    /* --- LOGIN OVERLAY --- */
-    #login-screen {
+    /* --- LOGIN & AUTH OVERLAY --- */
+    #auth-screen {
       position: fixed;
       inset: 0;
       background-color: var(--bg-tertiary);
@@ -43,22 +44,22 @@
       z-index: 1000;
     }
 
-    .login-card {
+    .auth-card {
       background-color: var(--bg-secondary);
       padding: 32px;
       border-radius: 8px;
       width: 100%;
-      max-width: 480px;
+      max-width: 400px;
       box-shadow: 0 8px 16px rgba(0,0,0,0.4);
       text-align: center;
     }
 
-    .login-card h2 {
+    .auth-card h2 {
       color: #fff;
       margin-bottom: 8px;
     }
 
-    .login-card p {
+    .auth-card p {
       color: var(--text-muted);
       margin-bottom: 20px;
       font-size: 14px;
@@ -66,7 +67,7 @@
 
     .input-group {
       text-align: left;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .input-group label {
@@ -75,7 +76,7 @@
       font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .input-group input {
@@ -83,9 +84,9 @@
       padding: 10px;
       background-color: var(--bg-tertiary);
       border: 1px solid rgba(0,0,0,0.3);
-      border-radius: 3px;
+      border-radius: 4px;
       color: #fff;
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
     }
 
@@ -93,31 +94,49 @@
       border-color: var(--brand);
     }
 
-    .login-btn {
+    .auth-btn {
       width: 100%;
       padding: 12px;
       background-color: var(--brand);
       color: #fff;
       border: none;
-      border-radius: 3px;
-      font-size: 16px;
+      border-radius: 4px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.2s;
+      margin-top: 8px;
     }
 
-    .login-btn:hover {
+    .auth-btn:hover {
       background-color: var(--brand-hover);
     }
 
-    /* --- DISCORD APP LAYOUT --- */
+    .auth-toggle {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .auth-toggle span {
+      color: #00a8fc;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    /* --- DISCORD APP MAIN LAYOUT --- */
     #app-container {
       display: flex;
       width: 100vw;
       height: 100vh;
     }
 
-    /* Server Sidebar */
     .server-sidebar {
       width: 72px;
       background-color: var(--bg-tertiary);
@@ -125,29 +144,21 @@
       flex-direction: column;
       align-items: center;
       padding-top: 12px;
-      gap: 8px;
     }
 
     .server-icon {
       width: 48px;
       height: 48px;
-      border-radius: 50%;
-      background-color: var(--bg-primary);
+      border-radius: 16px;
+      background-color: var(--brand);
       display: flex;
       justify-content: center;
       align-items: center;
       color: #fff;
       font-weight: bold;
-      cursor: pointer;
-      transition: border-radius 0.2s, background-color 0.2s;
+      font-size: 18px;
     }
 
-    .server-icon:hover, .server-icon.active {
-      border-radius: 16px;
-      background-color: var(--brand);
-    }
-
-    /* Channels Sidebar */
     .channels-sidebar {
       width: 240px;
       background-color: var(--bg-secondary);
@@ -163,7 +174,6 @@
       padding: 0 16px;
       font-weight: bold;
       color: #fff;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
     .channel-list {
@@ -175,24 +185,19 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 8px;
+      padding: 8px 10px;
       border-radius: 4px;
-      color: var(--text-muted);
-      cursor: pointer;
+      background-color: var(--bg-accent);
+      color: #fff;
       font-weight: 500;
     }
 
-    .channel-item:hover, .channel-item.active {
-      background-color: var(--bg-accent);
-      color: var(--text-normal);
-    }
-
     .user-panel {
-      height: 52px;
+      height: 56px;
       background-color: #232428;
       display: flex;
       align-items: center;
-      padding: 0 8px;
+      padding: 0 10px;
       gap: 8px;
     }
 
@@ -207,6 +212,7 @@
       color: #fff;
       font-weight: bold;
       font-size: 14px;
+      flex-shrink: 0;
     }
 
     .user-info {
@@ -223,12 +229,22 @@
       overflow: hidden;
     }
 
-    .user-status {
-      color: var(--green);
+    .logout-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
       font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 4px;
     }
 
-    /* Chat Area */
+    .logout-btn:hover {
+      background-color: var(--danger);
+      color: #fff;
+    }
+
+    /* Main Chat Area */
     .chat-area {
       flex-grow: 1;
       background-color: var(--bg-primary);
@@ -244,7 +260,7 @@
       padding: 0 16px;
       font-weight: bold;
       color: #fff;
-      gap: 8px;
+      gap: 6px;
     }
 
     .chat-messages {
@@ -258,7 +274,7 @@
 
     .message {
       display: flex;
-      gap: 16px;
+      gap: 14px;
     }
 
     .message-content {
@@ -275,33 +291,30 @@
     .author {
       color: #fff;
       font-weight: 600;
-      font-size: 15px;
+      font-size: 14px;
     }
 
     .timestamp {
       color: var(--text-muted);
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .text {
       color: var(--text-normal);
       font-size: 14px;
       margin-top: 4px;
-      line-height: 1.3;
+      line-height: 1.4;
       word-break: break-word;
     }
 
-    /* Input Box */
     .chat-input-wrapper {
-      padding: 0 16px 24px 16px;
+      padding: 0 16px 20px 16px;
     }
 
     .chat-input-container {
       background-color: #383a40;
       border-radius: 8px;
       padding: 0 16px;
-      display: flex;
-      align-items: center;
     }
 
     .chat-input-container input {
@@ -314,114 +327,206 @@
       font-size: 15px;
     }
   </style>
+
+  <!-- Firebase Real-time Engine (CDNs) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-  <!-- LOGIN SCREEN -->
-  <div id="login-screen">
-    <div class="login-card">
-      <h2>Welcome back!</h2>
-      <p>We're so excited to see you again!</p>
-      <form id="login-form">
+  <!-- LOGIN / REGISTER OVERLAY -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <h2 id="auth-title">Welcome Back!</h2>
+      <p id="auth-subtitle">Log in with your account credentials</p>
+      <div id="error-box" class="error-msg"></div>
+
+      <form id="auth-form">
         <div class="input-group">
-          <label for="username">Display Name</label>
-          <input type="text" id="username" required placeholder="Enter a username..." autocomplete="off" />
+          <label for="username">Username</label>
+          <input type="text" id="username" required autocomplete="off" placeholder="Enter username..." />
         </div>
-        <button type="submit" class="login-btn">Log In</button>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required autocomplete="off" placeholder="Enter password..." />
+        </div>
+
+        <button type="submit" id="submit-btn" class="auth-btn">Log In</button>
       </form>
+
+      <div class="auth-toggle">
+        <span id="toggle-auth-mode">Need an account? Register</span>
+      </div>
     </div>
   </div>
 
-  <!-- MAIN DISCORD APP CONTAINER -->
+  <!-- MAIN CHAT APPLICATION -->
   <div id="app-container">
     
-    <!-- Servers Sidebar -->
     <div class="server-sidebar">
-      <div class="server-icon active">D</div>
-      <div class="server-icon">+</div>
+      <div class="server-icon">D</div>
     </div>
 
-    <!-- Channels Sidebar -->
     <div class="channels-sidebar">
       <div class="server-header">
-        <span>chat</span>
+        <span>Global Server</span>
       </div>
       <div class="channel-list">
-        <div class="channel-item active">
-          <span>#</span> general
-        </div>
         <div class="channel-item">
-          <span>#</span> random
+          <span>#</span> global-chat
         </div>
       </div>
       <div class="user-panel">
         <div class="avatar" id="user-avatar">?</div>
         <div class="user-info">
           <div class="user-name" id="display-user-name">Guest</div>
-          <div class="user-status">Online</div>
         </div>
+        <button class="logout-btn" id="logout-btn">Logout</button>
       </div>
     </div>
 
-    <!-- Main Chat Area -->
     <div class="chat-area">
       <div class="chat-header">
-        <span>#</span> general
+        <span>#</span> global-chat
       </div>
 
-      <div class="chat-messages" id="message-container">
-        <!-- Messages populate here -->
-      </div>
+      <div class="chat-messages" id="message-container"></div>
 
       <div class="chat-input-wrapper">
         <div class="chat-input-container">
-          <input type="text" id="chat-input" placeholder="Message #general" autocomplete="off" />
+          <input type="text" id="chat-input" placeholder="Message #global-chat..." autocomplete="off" />
         </div>
       </div>
     </div>
+
   </div>
 
   <script>
-    let currentUser = "";
+    // --- 1. FIREBASE REAL-TIME DATABASE SETUP ---
+    // Uses a public demo Firebase endpoint to sync across devices worldwide instantly.
+    const firebaseConfig = {
+      databaseURL: "https://discord-clone-global-default-rtdb.firebaseio.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const messagesRef = db.ref("global_messages");
 
-    const loginScreen = document.getElementById('login-screen');
-    const loginForm = document.getElementById('login-form');
+    // --- 2. STATE MANAGEMENT ---
+    let currentUser = null;
+    let isRegisterMode = false;
+
+    // DOM Elements
+    const authScreen = document.getElementById('auth-screen');
+    const authForm = document.getElementById('auth-form');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
     const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-btn');
+    const toggleAuthMode = document.getElementById('toggle-auth-mode');
+    const errorBox = document.getElementById('error-box');
 
     const displayUserName = document.getElementById('display-user-name');
     const userAvatar = document.getElementById('user-avatar');
-    
+    const logoutBtn = document.getElementById('logout-btn');
+
     const messageContainer = document.getElementById('message-container');
     const chatInput = document.getElementById('chat-input');
 
-    // 1. Handle Login
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const val = usernameInput.value.trim();
-      if (val) {
-        currentUser = val;
-        displayUserName.textContent = currentUser;
-        userAvatar.textContent = currentUser.charAt(0).toUpperCase();
-        loginScreen.style.display = 'none';
-        chatInput.focus();
+    // Load registered accounts from localStorage
+    function getStoredAccounts() {
+      return JSON.parse(localStorage.getItem('app_accounts') || '{}');
+    }
+
+    function saveAccount(user, pass) {
+      const accounts = getStoredAccounts();
+      accounts[user.toLowerCase()] = { username: user, password: pass };
+      localStorage.setItem('app_accounts', JSON.stringify(accounts));
+    }
+
+    // Toggle between Login and Register
+    toggleAuthMode.addEventListener('click', () => {
+      isRegisterMode = !isRegisterMode;
+      errorBox.style.display = 'none';
+      if (isRegisterMode) {
+        authTitle.textContent = "Create an Account";
+        authSubtitle.textContent = "Register with a username and password";
+        submitBtn.textContent = "Register";
+        toggleAuthMode.textContent = "Already have an account? Log In";
+      } else {
+        authTitle.textContent = "Welcome Back!";
+        authSubtitle.textContent = "Log in with your account credentials";
+        submitBtn.textContent = "Log In";
+        toggleAuthMode.textContent = "Need an account? Register";
       }
     });
 
-    // 2. Render Single Message
-    function appendMessage({ author, text, timestamp }) {
+    // Handle Form Auth
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const userVal = usernameInput.value.trim();
+      const passVal = passwordInput.value.trim();
+      const accounts = getStoredAccounts();
+      const key = userVal.toLowerCase();
+
+      errorBox.style.display = 'none';
+
+      if (isRegisterMode) {
+        if (accounts[key]) {
+          showError("Username is already taken!");
+          return;
+        }
+        saveAccount(userVal, passVal);
+        loginUser(userVal);
+      } else {
+        if (!accounts[key] || accounts[key].password !== passVal) {
+          showError("Invalid username or password.");
+          return;
+        }
+        loginUser(accounts[key].username);
+      }
+    });
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    function loginUser(name) {
+      currentUser = name;
+      displayUserName.textContent = currentUser;
+      userAvatar.textContent = currentUser.charAt(0).toUpperCase();
+      authScreen.style.display = 'none';
+      usernameInput.value = '';
+      passwordInput.value = '';
+      chatInput.focus();
+    }
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+      currentUser = null;
+      authScreen.style.display = 'flex';
+    });
+
+    // --- 3. MESSAGING LOGIC ---
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    function renderMessage(data) {
       const msgDiv = document.createElement('div');
       msgDiv.className = 'message';
+      const initial = data.author ? data.author.charAt(0).toUpperCase() : '?';
 
-      const initial = author.charAt(0).toUpperCase();
-      
       msgDiv.innerHTML = `
         <div class="avatar">${initial}</div>
         <div class="message-content">
           <div class="message-header">
-            <span class="author">${escapeHtml(author)}</span>
-            <span class="timestamp">${timestamp}</span>
+            <span class="author">${escapeHtml(data.author || 'Anonymous')}</span>
+            <span class="timestamp">${data.timestamp || ''}</span>
           </div>
-          <div class="text">${escapeHtml(text)}</div>
+          <div class="text">${escapeHtml(data.text || '')}</div>
         </div>
       `;
 
@@ -429,30 +534,20 @@
       messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 
-    // Sanitize string against XSS
-    function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    }
-
-    // 3. Send Message Action
+    // Send Message
     function sendMessage() {
       const text = chatInput.value.trim();
       if (!text || !currentUser) return;
 
       const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      const msgObj = {
+      messagesRef.push({
         author: currentUser,
         text: text,
         timestamp: time
-      };
+      });
 
-      // Display locally
-      appendMessage(msgObj);
       chatInput.value = '';
-
-      // Sync across open browser tabs using BroadcastChannel API
-      channel.postMessage(msgObj);
     }
 
     chatInput.addEventListener('keydown', (e) => {
@@ -461,12 +556,11 @@
       }
     });
 
-    // 4. Real-time Cross-Tab Sync via BroadcastChannel
-    const channel = new BroadcastChannel('discord_local_chat');
-
-    channel.onmessage = (event) => {
-      appendMessage(event.data);
-    };
+    // Listen to Firebase incoming real-time messages worldwide
+    messagesRef.limitToLast(50).on('child_added', (snapshot) => {
+      const data = snapshot.val();
+      renderMessage(data);
+    });
   </script>
 </body>
 </html>
